@@ -1,0 +1,64 @@
+services:
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: app-backend:1.0
+    container_name: app
+    ports:
+      # Пробрасываем порт наружу, чтобы приложение было доступно с хоста
+      - "8080:8080"
+    environment:
+      HTTP_PORT: "8080"
+      STATIC_DIR: /app/static
+      # Внутри сети Compose контейнеры видят друг друга по имени сервиса (db)
+      DB_HOST: db
+      DB_PORT: "5432"
+      # Берем секреты из .env файла. Если их там нет, используем дефолтные
+      DB_USER: ${DB_USER:-app}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      DB_NAME: ${DB_NAME:-appdb}
+    volumes:
+      # Монтируем папку с фронтендом read-only (:ro). Это позволяет менять HTML/CSS на Mac без пересборки образа. :ro защищает файлы от изменения изнутри контейнера.
+      - ./frontend:/app/static:ro
+    depends_on:
+      db:
+        # Ждем статуса "healthy" для бд.
+        # Без этого приложение упадет с ошибкой connection refused, так как Postgres инициализируется дольше.
+        condition: service_healthy #ждем пока бд готова будет
+    restart: unless-stopped
+    networks:
+      - app_net
+
+  db:
+    image: postgres:16-alpine
+    container_name: app-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_DB: ${DB_NAME:-appdb}
+    healthcheck:
+      # pg_isready проверяет, готов ли Postgres принимать tcp-подключения.
+      # Compose использует этот статус для запуска сервиса app
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app} -d ${DB_NAME:-appdb}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    volumes:
+      # Именованный том для сохранения данных БД между перезапусками контейнера
+      - db_data:/var/lib/postgresql/data
+      # Монтируем SQL-скрипты. Postgres автоматически выполнит их при первом запуске с пустой БД.
+      - ./init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    networks:
+      - app_net
+    # у бд нет секции ports это значит что бд доступна только внутри сети app_net
+
+volumes:
+  db_data:
+
+networks:
+# Создаем изолированную bridge-сеть, чтобы приложение и БД могли общаться, но не были доступны другим контейнерам на хосте
+  app_net:
+    driver: bridge

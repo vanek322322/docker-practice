@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/lib/pq"
-)
+	_ "github.com/lib/pq" 
 
 type Item struct {
 	ID   int    `json:"id"`

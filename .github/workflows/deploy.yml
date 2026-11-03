@@ -39,6 +39,7 @@ jobs:
       - name: Deploy with Docker Compose
         run: |
           echo "Starting application stack..."
+          docker compose down || true
           docker compose up -d --build
           echo "Waiting for services to start..."
           sleep 20

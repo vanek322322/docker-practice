@@ -1,6 +1,9 @@
 # Сборка
 FROM golang:1.22-alpine AS builder
 
+# Используем альтернативный прокси для скачивания зависимостей (чтобы не было i/o timeout)
+ENV GOPROXY=https://goproxy.cn,direct
+
 WORKDIR /build
 
 # Сначала копируем все файлы проекта, чтобы go mod tidy видел импорты в main.go

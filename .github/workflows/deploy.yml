@@ -38,8 +38,12 @@ jobs:
       # Критерий 2 (1 балл): Workflow выполняет docker compose up -d
       - name: Deploy with Docker Compose
         run: |
-          echo "Starting application stack..."
+          echo "Cleaning up old containers..."
+          # Жестко убиваем старые контейнеры по именам, если они зависли
+          docker rm -f app app-db || true
           docker compose down || true
+          
+          echo "Starting application stack..."
           docker compose up -d --build
           echo "Waiting for services to start..."
           sleep 20

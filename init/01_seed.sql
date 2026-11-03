@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS items (
     name TEXT NOT NULL
 );
 
-INSERT INTO items (name) VALUES ('1'), ('Ivan'), ('2'), ('Kirill'), ('3'), ('Misha');
+INSERT INTO items (name) VALUES ('1'), ('Ivan'), ('2'), ('Kirill');

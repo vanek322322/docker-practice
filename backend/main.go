@@ -53,10 +53,6 @@ func main() {
 		json.NewEncoder(w).Encode(items)
 	})
 
-	// ==========================================================
-	// ДОБАВЛЕНО ДЛЯ ПЕРВОЙ ПРАКТИКИ (GitHub Actions)
-	// ==========================================================
-
 	// 1. Эндпоинт для проверки "живости" приложения (Критерий 4)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -75,7 +71,6 @@ func main() {
 		json.NewEncoder(w).Encode(count)
 	})
 
-	// ==========================================================
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fs.ServeHTTP(w, r)

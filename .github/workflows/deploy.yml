@@ -10,14 +10,14 @@ env:
 
 jobs:
   deploy-and-test:
-    # Критерий 1 (3 балла): Использование self-hosted runner
+    # Критерий 1: Использование self-hosted runner
     runs-on: [self-hosted, macOS, ARM64]
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Критерий 3 (1 балл): Секреты подставляются в .env
+      # Критерий 3: Секреты подставляются в .env
       - name: Create .env file from secrets
         run: |
           echo "Creating .env file from GitHub Secrets..."
@@ -35,7 +35,7 @@ jobs:
           echo ".env file created successfully"
           cat .env | sed 's/=.*/=***/'
 
-      # Критерий 2 (1 балл): Workflow выполняет docker compose up -d
+      # Критерий 2: Workflow выполняет docker compose up -d
       - name: Deploy with Docker Compose
         run: |
           echo "Cleaning up old containers..."
@@ -49,7 +49,7 @@ jobs:
           sleep 20
           docker compose ps
 
-      # Критерий 2 (1 балл): Контейнеры запущены (running)
+      # Критерий 2: Контейнеры запущены (running)
       - name: Verify containers are running
         run: |
           if docker compose ps | grep -q "Up"; then
@@ -60,7 +60,7 @@ jobs:
             exit 1
           fi
 
-      # Критерий 4 (2 балла): Тестирование приложения
+      # Критерий 4: Тестирование приложения
       - name: Run application tests
         run: |
           echo "1. Testing application and database connectivity..."
@@ -87,7 +87,7 @@ jobs:
             exit 1
           fi
 
-      # Критерий 3 (2 балла): Создание и сохранение артефактов
+      # Критерий 3: Создание и сохранение артефактов
       - name: Create test report
         run: |
           echo "Creating test report..."
